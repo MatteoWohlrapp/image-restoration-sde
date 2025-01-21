@@ -29,8 +29,8 @@ datasets:
   dataroot_GT: /lotterlab/datasets/ 
 
   use_shuffle: true
-  n_workers: 4  # per GPU
-  batch_size: 4
+  n_workers: 16  # per GPU
+  batch_size: 64
   GT_size: 256
   LR_size: 256
   use_flip: true
@@ -71,5 +71,5 @@ train:
   manual_seed: 0
 #### logger
 logger:
-  print_freq: 2
+  print_freq: 400
   save_checkpoint_freq: !!float 5e3
