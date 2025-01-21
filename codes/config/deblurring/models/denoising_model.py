@@ -26,20 +26,12 @@ class DenoisingModel(BaseModel):
     def __init__(self, opt):
         super(DenoisingModel, self).__init__(opt)
 
-        if opt["dist"]:
-            self.rank = torch.distributed.get_rank()
-        else:
-            self.rank = -1  # non dist training
+        self.rank = -1  # non dist training
         train_opt = opt["train"]
 
         # define network and load pretrained models
         self.model = networks.define_G(opt).to(self.device)
-        if opt["dist"]:
-            self.model = DistributedDataParallel(
-                self.model, device_ids=[torch.cuda.current_device()]
-            )
-        else:
-            self.model = DataParallel(self.model)
+
         # print network
         # self.print_network()
         self.load()

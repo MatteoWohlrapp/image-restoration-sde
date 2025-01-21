@@ -26,35 +26,35 @@ def parse(opt_path, is_train=True):
     opt["is_train"] = is_train
 
     scale = 1
-    if opt['distortion'] == 'sr':
+    if opt.get('distortion') == 'sr':
         scale = opt['degradation']['scale']
-
         ##### sr network ####
         opt["network_G"]["setting"]["upscale"] = scale
-        # opt["network_G"]["setting"]["in_nc"] *= scale**2
 
     # datasets
-    for phase, dataset in opt["datasets"].items():
-        phase = phase.split("_")[0]
-        print(dataset)
-        dataset["phase"] = phase
-        dataset["scale"] = scale
-        
-        is_lmdb = False
-        if dataset.get("dataroot_GT", None) is not None:
-            dataset["dataroot_GT"] = osp.expanduser(dataset["dataroot_GT"])
-            if dataset["dataroot_GT"].endswith("lmdb"):
-                is_lmdb = True
-        # if dataset.get('dataroot_GT_bg', None) is not None:
-        #     dataset['dataroot_GT_bg'] = osp.expanduser(dataset['dataroot_GT_bg'])
-        if dataset.get("dataroot_LQ", None) is not None:
-            dataset["dataroot_LQ"] = osp.expanduser(dataset["dataroot_LQ"])
-            if dataset["dataroot_LQ"].endswith("lmdb"):
-                is_lmdb = True
-        dataset["data_type"] = "lmdb" if is_lmdb else "img"
-        if dataset["mode"].endswith("mc"):  # for memcached
-            dataset["data_type"] = "mc"
-            dataset["mode"] = dataset["mode"].replace("_mc", "")
+    # Only process datasets if it's a dictionary with phases
+    if isinstance(opt.get("datasets", {}), dict) and any(k.endswith('_dataset') for k in opt["datasets"].keys()):
+        for phase, dataset in opt["datasets"].items():
+            phase = phase.split("_")[0]
+            dataset["phase"] = phase
+            dataset["scale"] = scale
+            
+            is_lmdb = False
+            if dataset.get("dataroot_GT", None) is not None:
+                dataset["dataroot_GT"] = osp.expanduser(dataset["dataroot_GT"])
+                if dataset["dataroot_GT"].endswith("lmdb"):
+                    is_lmdb = True
+            if dataset.get("dataroot_LQ", None) is not None:
+                dataset["dataroot_LQ"] = osp.expanduser(dataset["dataroot_LQ"])
+                if dataset["dataroot_LQ"].endswith("lmdb"):
+                    is_lmdb = True
+            dataset["data_type"] = "lmdb" if is_lmdb else "img"
+            if dataset["mode"].endswith("mc"):  # for memcached
+                dataset["data_type"] = "mc"
+                dataset["mode"] = dataset["mode"].replace("_mc", "")
+    else:
+        # Handle the new dataset format (chex/ucsf)
+        opt["datasets"]["scale"] = scale
 
     # path
     for key, path in opt["path"].items():

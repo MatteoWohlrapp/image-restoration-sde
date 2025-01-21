@@ -1,5 +1,5 @@
 #### general settings
-name: ir-sde
+name: ucsf8-sde
 use_tb_logger: true
 model: denoising
 distortion: deblur
@@ -21,33 +21,31 @@ degradation: # for some synthetic dataset that only have GTs
   
 #### datasets
 datasets:
-  train:
-    name: Train_Dataset
-    mode: LQGT
-    dataroot_GT: /home/ziwlu/datasets/gopro/test_full/GT
-    dataroot_LQ: /home/ziwlu/datasets/gopro/test_full/LQ
+  number_of_samples: 100
+  dataset: ucsf
+  dataroot: /home/ziwlu/datasets/ucsf/train.csv
+  sampling_mask: radial
+  type: FLAIR
+  pathology: [TODO]
+  lower_slice: 60
+  upper_slice: 130
+  number_of_rays
+  number_of_slices: 10
 
-    use_shuffle: true
-    n_workers: 4  # per GPU
-    batch_size: 4
-    GT_size: 128
-    LR_size: 128
-    use_flip: true
-    use_rot: true
-    color: RGB
-  val:
-    name: Val_Dataset
-    mode: LQGT
-    dataroot_GT: /home/ziwlu/datasets/gopro/test_full/GT
-    dataroot_LQ: /home/ziwlu/datasets/gopro/test_full/LQ
-
-
+  use_shuffle: true
+  n_workers: 8  # per GPU
+  batch_size: 4
+  GT_size: 256
+  LR_size: 256
+  use_flip: true
+  use_rot: true
+  color: RGB
 #### network structures
 network_G:
   which_model_G: ConditionalUNet
   setting:
-    in_nc: 3
-    out_nc: 3
+    in_nc: 1
+    out_nc: 1
     nf: 64
     depth: 4
 
