@@ -21,15 +21,16 @@ degradation: # for some synthetic dataset that only have GTs
   
 #### datasets
 datasets:
+  number_of_samples: 32
   dataset: chex
-  csv_path_LQ: /vol/aimspace/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert_noisy/chex-metadata_photon_100000.csv
-  csv_path_GT: /vol/aimspace/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert/chex-metadata.csv
-  dataroot_LQ: /vol/aimspace/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert_noisy
-  dataroot_GT: /vol/miltank/datasets/CheXpert 
+  csv_path_LQ: /lotterlab/project_data/CheXpert_noise/metadata_photon_10000.csv
+  csv_path_GT: /lotterlab/users/matteo/data/CheXpert/metadata.csv
+  dataroot_LQ: /lotterlab/project_data/CheXpert_noise
+  dataroot_GT: /lotterlab/datasets/
 
   use_shuffle: true
-  n_workers: 16 
-  batch_size: 64
+  n_workers: 1  
+  batch_size: 2
   GT_size: 256
   LR_size: 256
   use_flip: true
@@ -57,7 +58,8 @@ train:
   lr_scheme: MultiStepLR
   beta1: 0.9
   beta2: 0.99
-  niter: 700000
+  #niter: 700000
+  niter: 100
   warmup_iter: -1  # no warm up
   lr_steps: [200000, 400000, 600000]
   lr_gamma: 0.5
@@ -71,4 +73,4 @@ train:
 #### logger
 logger:
   print_per_epoch: 2
-  save_checkpoint_freq: 10
+  save_checkpoint_freq: 1

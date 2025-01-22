@@ -10,6 +10,7 @@ import cv2
 import numpy as np
 import torch
 import wandb  # Add this import at the top
+from tqdm import tqdm  # Add this import at the top
 # from IPython import embed
 
 import options as option
@@ -152,15 +153,17 @@ def main():
     )
 
     # Define frequencies for different operations
-    train_freq = opt["logger"]["print_freq"]  # Print training stats (e.g., every 100 iters)
+    train_freq = train_size / opt["logger"]["print_per_epoch"] 
     
     best_psnr = 0.0
     best_iter = 0
 
     for epoch in range(start_epoch, total_epochs + 1):
-        for _, train_data in enumerate(train_loader):
+        # Add progress bar for each epoch
+        train_bar = tqdm(train_loader, desc=f'Epoch {epoch}/{total_epochs}')
+        
+        for train_data in train_bar:
             current_step += 1
-            print(f"current_step: {current_step}", flush=True)
             if current_step > total_iters:
                 break
 
@@ -170,6 +173,9 @@ def main():
             model.feed_data(states, LQ, GT)
             model.optimize_parameters(current_step, timesteps, sde)
             model.update_learning_rate(current_step, warmup_iter=opt["train"]["warmup_iter"])
+
+            # Update progress bar with loss
+            train_bar.set_postfix({"loss": model.get_current_log()["loss"]})
 
             # Print training progress and log training samples
             if current_step % train_freq == 0:
