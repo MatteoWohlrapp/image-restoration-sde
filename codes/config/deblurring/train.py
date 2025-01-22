@@ -160,6 +160,7 @@ def main():
     for epoch in range(start_epoch, total_epochs + 1):
         for _, train_data in enumerate(train_loader):
             current_step += 1
+            print(f"current_step: {current_step}", flush=True)
             if current_step > total_iters:
                 break
 
@@ -228,13 +229,16 @@ def main():
             avg_psnr += util.calculate_psnr(output, gt_img)
 
         avg_psnr = avg_psnr / len(val_loader)
-        
-        # Update best model
+
         if avg_psnr > best_psnr:
             best_psnr = avg_psnr
             best_iter = current_step
+        # Update best model
+        """if avg_psnr > best_psnr:
+            best_psnr = avg_psnr
+            best_iter = current_step
             logger.info("Saving best model...")
-            model.save('best')
+            model.save('best')"""
 
         logger.info("# Epoch {} Validation # PSNR: {:.4f}, Best PSNR: {:.4f} @ iter {}".format(
             epoch, avg_psnr, best_psnr, best_iter))
@@ -247,9 +251,10 @@ def main():
         }, step=current_step)
 
         # Save epoch checkpoint
-        logger.info("Saving checkpoint...")
-        model.save(epoch)
-        model.save_training_state(epoch, current_step)
+        if epoch % opt["logger"]["save_checkpoint_freq"] == 0:
+            logger.info("Saving checkpoint...")
+            model.save(epoch)
+            model.save_training_state(epoch, current_step)
         
     logger.info("Saving final model...")
     model.save("latest")
