@@ -145,7 +145,6 @@ class DenoisingModel(BaseModel):
         self.model.eval()
         with torch.no_grad():
             self.output = sde.reverse_sde(self.state, save_states=save_states)
-
         self.model.train()
 
     def get_current_log(self):
@@ -157,6 +156,13 @@ class DenoisingModel(BaseModel):
         out_dict["Output"] = self.output.detach()[0].float().cpu()
         if need_GT:
             out_dict["GT"] = self.state_0.detach()[0].float().cpu()
+        return out_dict
+    
+    def get_current_test_visuals(self):
+        out_dict = OrderedDict()
+        out_dict["Input"] = self.condition.detach().float().cpu()
+        out_dict["Output"] = self.output.detach().float().cpu()
+        out_dict["GT"] = self.state_0.detach().float().cpu()
         return out_dict
 
     def print_network(self):

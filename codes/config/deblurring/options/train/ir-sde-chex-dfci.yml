@@ -21,9 +21,9 @@ degradation: # for some synthetic dataset that only have GTs
   
 #### datasets
 datasets:
-  number_of_samples: 32
+  number_of_samples: 2
   dataset: chex
-  csv_path_LQ: /lotterlab/project_data/CheXpert_noise/metadata_photon_10000.csv
+  csv_path_LQ: /lotterlab/project_data/CheXpert_noise/metadata_photon_100000.csv
   csv_path_GT: /lotterlab/users/matteo/data/CheXpert/metadata.csv
   dataroot_LQ: /lotterlab/project_data/CheXpert_noise
   dataroot_GT: /lotterlab/datasets/

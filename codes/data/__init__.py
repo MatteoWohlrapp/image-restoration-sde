@@ -20,8 +20,9 @@ def create_dataloader(dataset, opt, sampler=None):
             pin_memory=False,
         )
     else:
+        batch_size = opt["datasets"]["batch_size"]
         return torch.utils.data.DataLoader(
-            dataset, batch_size=1, shuffle=False, num_workers=1, pin_memory=True
+            dataset, batch_size=batch_size, shuffle=False, num_workers=1, pin_memory=True
         )
 
 
@@ -42,4 +43,11 @@ def create_dataset(dataset_opt, train=True):
             dataset.__class__.__name__, dataset_mode
         )
     )
+    return dataset
+
+def create_test_dataset(dataset_opt):
+    dataset_mode = dataset_opt["dataset"]
+    if dataset_mode == "chex":  # Predictor
+        from data.chex_dataset import ChexDataset as D
+        dataset = D(dataset_opt, train=False, test=True)
     return dataset

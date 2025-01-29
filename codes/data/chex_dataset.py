@@ -20,7 +20,7 @@ def min_max_slice_normalization(scan: torch.Tensor) -> torch.Tensor:
 class ChexDataset(data.Dataset):
     """Dataset for X-ray reconstruction using CycleGAN."""
 
-    def __init__(self, opt, train=True):
+    def __init__(self, opt, train=True, test=False):
         super().__init__()
         self.opt = opt
         self.data_root_LQ = pathlib.Path(opt["dataroot_LQ"])
@@ -30,6 +30,7 @@ class ChexDataset(data.Dataset):
         self.number_of_samples = opt["number_of_samples"] if "number_of_samples" in opt else None
         self.seed = opt["seed"] if "seed" in opt else 31415
         self.train = train
+        self.test = test
         
         # Load metadata
         self.metadata_LQ, self.metadata_GT = self._load_metadata()
@@ -47,9 +48,12 @@ class ChexDataset(data.Dataset):
         if self.train:
             df_LQ = df_LQ.filter(pl.col("split") == "train_recon")
             df_GT = df_GT.filter(pl.col("split") == "train_recon")
-        else:
+        elif not self.test:
             df_LQ = df_LQ.filter(pl.col("split") == "val_recon")
             df_GT = df_GT.filter(pl.col("split") == "val_recon")
+        else:
+            df_LQ = df_LQ.filter(pl.col("split") == "test")
+            df_GT = df_GT.filter(pl.col("split") == "test")
             
         if self.number_of_samples is not None and self.number_of_samples > 0:
             df_LQ = df_LQ.sample(n=self.number_of_samples, seed=self.seed)

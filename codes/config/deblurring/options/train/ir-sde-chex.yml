@@ -1,5 +1,5 @@
 #### general settings
-name: chex10000-sde-test
+name: chex10000-sde
 use_tb_logger: true
 model: denoising
 distortion: deblur
@@ -29,7 +29,7 @@ datasets:
 
   use_shuffle: true
   n_workers: 16 
-  batch_size: 64
+  batch_size: 8
   GT_size: 256
   LR_size: 256
   use_flip: true
