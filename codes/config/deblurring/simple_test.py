@@ -77,7 +77,7 @@ def main():
     
     # Write header if file is new
     if not csv_exists:
-        csv_writer.writerow(['image_name', 'psnr', 'processing_time'])
+        csv_writer.writerow(['image_name', 'psnr', 'ssim', 'processing_time'])
 
     try:
         for i, test_data in enumerate(test_loader):

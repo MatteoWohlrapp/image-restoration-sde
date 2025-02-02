@@ -45,12 +45,16 @@ class UcsfDataset(data.Dataset):
         self.number_of_samples = opt["number_of_samples"] if "number_of_samples" in opt else None
         self.seed = opt["seed"] if "seed" in opt else 31415
         self.split = opt["phase"]  # use CycleGAN's phase (train/test) as split
-        self.type = opt["type"] if "type" in opt else 'T2'
+        self.type = opt["type"] if "type" in opt else "FLAIR"
         self.pathology = opt["pathology"] if "pathology" in opt else None
-        self.lower_slice = opt["lower_slice"] if "lower_slice" in opt else None
-        self.upper_slice = opt["upper_slice"] if "upper_slice" in opt else None
+        self.lower_slice = opt["lower_slice"] if "lower_slice" in opt else 60
+        self.upper_slice = opt["upper_slice"] if "upper_slice" in opt else 130
         self.number_of_rays = opt["number_of_rays"] if "number_of_rays" in opt else 22
+        print(f"Number of rays: {self.number_of_rays}")
         self.train = train
+        print(f"Type: {self.type}")
+        print(f"Lower slice: {self.lower_slice}")
+        print(f"Upper slice: {self.upper_slice}")
         
         # Load metadata
         self.metadata = self._load_metadata()
