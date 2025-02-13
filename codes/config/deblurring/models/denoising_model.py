@@ -110,11 +110,16 @@ class DenoisingModel(BaseModel):
             self.ema = EMA(self.model, beta=0.995, update_every=10).to(self.device)
             self.log_dict = OrderedDict()
 
-    def feed_data(self, state, LQ, GT=None):
+    def feed_data(self, state, LQ, GT=None, protected_attrs=None, labels=None):
         self.state = state.to(self.device)    # noisy_state
         self.condition = LQ.to(self.device)  # LQ
         if GT is not None:
             self.state_0 = GT.to(self.device)  # GT
+
+        if protected_attrs is not None:
+            self.protected_attrs = protected_attrs.to(self.device)
+        if labels is not None:
+            self.labels = labels.to(self.device)
 
     def optimize_parameters(self, step, timesteps, sde=None):
         sde.set_mu(self.condition)
@@ -131,6 +136,8 @@ class DenoisingModel(BaseModel):
         xt_1_expection = sde.reverse_sde_step_mean(self.state, score, timesteps)
         xt_1_optimum = sde.reverse_optimum_step(self.state, self.state_0, timesteps)
         loss = self.weight * self.loss_fn(xt_1_expection, xt_1_optimum)
+        fairness_loss = self.fairness_loss(xt_1_optimum, self.labels, self.protected_attrs)
+        loss += fairness_loss
 
         loss.backward()
         self.optimizer.step()

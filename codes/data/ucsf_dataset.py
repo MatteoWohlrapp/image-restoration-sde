@@ -83,9 +83,11 @@ class UcsfDataset(data.Dataset):
             df = df.filter(pl.col("slice_id") <= self.upper_slice)
 
         if self.train:
-            df = df.filter(pl.col("split") == "train")
-        else:
             df = df.filter(pl.col("split") == "val")
+        else:
+            df = df.filter(pl.col("split") == "train")
+            # select 10000 samples
+            df = df.sample(n=10000, seed=self.seed)
             
         # Sample if number_of_samples is specified
         if self.number_of_samples is not None and self.number_of_samples > 0:
@@ -170,13 +172,21 @@ class UcsfDataset(data.Dataset):
         # Prepare for CycleGAN (both need to be 3D tensors: C×H×W)
         slice_tensor = slice_tensor.unsqueeze(0)
         undersampled_tensor = undersampled_tensor.unsqueeze(0)
+
+        sex = float(0 if row["sex"] == "F" else 1)
+        age = float(row["age_at_mri"] <= 58)
+
+        grade = float(0 if int(row["who_cns_grade"]) <= 3 else 1)
+        type = float(1 if row["final_diagnosis"] == "Glioblastoma, IDH-wildtype" else 0)
         
         # Return in CycleGAN format but using your file paths
         return {
             'LQ': undersampled_tensor,  # undersampled image
             'GT': slice_tensor,         # fully sampled image
             'LQ_paths': str(row["file_path"]),
-            'GT_paths': str(row["file_path"])
+            'GT_paths': str(row["file_path"]),
+            'labels': torch.tensor([grade, type]),
+            'protected_attrs': torch.tensor([sex, age])
         }
 
     def __len__(self):

@@ -20,8 +20,41 @@ sys.path.insert(0, "../../")
 import utils as util
 from data import create_dataloader, create_dataset
 from data.data_sampler import DistIterSampler
-
+from fairness.fairness_loss import FairnessLoss
+from fairness.classification_model import TGradeBCEClassifier, TTypeBCEClassifier
+from fairness.resnet_classification_network import ResNetClassifierNetwork
 from data.util import bgr2ycbcr
+
+def load_classifier_models(config, device):
+    if config["datasets"]["dataset"] == "chex":
+        classifier = torch.load(config["classifier_path"], map_location=device)
+        for param in classifier.parameters():
+            param.requires_grad = False
+        return classifier
+    elif config["datasets"]["dataset"] == "ucsf":
+        task_models = {}
+        for classifier_config in config["classifiers"]:
+            if classifier_config["name"] == "TGradeBCEClassifier":
+                classifier = TGradeBCEClassifier()
+            elif classifier_config["name"] == "TTypeBCEClassifier":
+                classifier = TTypeBCEClassifier()
+            classifier = classifier.to(device)
+
+            network = ResNetClassifierNetwork(num_classes=classifier.num_classes
+                                                , resnet_version="resnet18")
+            
+            network = network.to(device)
+            classifier.set_network(network)
+            classifier.load_state_dict(torch.load(classifier_config["path"], map_location=device))
+            for param in classifier.parameters():
+                param.requires_grad = False
+            task_models[classifier_config["name"]] = classifier
+
+        def apply_task_models(x):
+            first_output = task_models["TGradeBCEClassifier"](x)
+            second_output = task_models["TTypeBCEClassifier"](x)
+            return torch.cat((first_output, second_output), dim=1)
+        return apply_task_models
 
 
 def main():
@@ -139,6 +172,10 @@ def main():
     device = model.device
     print(f"device: {device}", flush=True)
 
+    classifier_models = load_classifier_models(opt, device)
+    fairness_loss = FairnessLoss(classifier_models, fairness_lambda=opt["fairness_lambda"])
+    model.fairness_loss = fairness_loss
+
     current_step = 0
     start_epoch = 0
 
@@ -169,8 +206,10 @@ def main():
 
             # Training step
             LQ, GT = train_data["LQ"], train_data["GT"]
+            labels = train_data["labels"]
+            protected_attrs = train_data["protected_attrs"]
             timesteps, states = sde.generate_random_states(x0=GT, mu=LQ)
-            model.feed_data(states, LQ, GT)
+            model.feed_data(states, LQ, GT, labels=labels, protected_attrs=protected_attrs)
             model.optimize_parameters(current_step, timesteps, sde)
             model.update_learning_rate(current_step, warmup_iter=opt["train"]["warmup_iter"])
 
@@ -196,8 +235,10 @@ def main():
                         break
                         
                     LQ, GT = val_data["LQ"], val_data["GT"]
+                    labels = val_data["labels"]
+                    protected_attrs = val_data["protected_attrs"]
                     noisy_state = sde.noise_state(LQ)
-                    model.feed_data(noisy_state, LQ, GT)
+                    model.feed_data(noisy_state, LQ, GT, labels=labels, protected_attrs=protected_attrs)
                     model.test(sde)
                     visuals = model.get_current_visuals()
                     
@@ -225,8 +266,10 @@ def main():
             if idx >= 1:
                 break
             LQ, GT = val_data["LQ"], val_data["GT"]
+            labels = val_data["labels"]
+            protected_attrs = val_data["protected_attrs"]
             noisy_state = sde.noise_state(LQ)
-            model.feed_data(noisy_state, LQ, GT)
+            model.feed_data(noisy_state, LQ, GT, labels=labels, protected_attrs=protected_attrs)
             model.test(sde)
             visuals = model.get_current_visuals()
             

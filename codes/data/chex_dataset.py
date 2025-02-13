@@ -8,6 +8,7 @@ import polars as pl
 import torch
 import torchvision.transforms as transforms
 import torch.utils.data as data
+import pandas as pd
 
 def min_max_slice_normalization(scan: torch.Tensor) -> torch.Tensor:
     scan_min = scan.min()
@@ -31,9 +32,28 @@ class ChexDataset(data.Dataset):
         self.seed = opt["seed"] if "seed" in opt else 31415
         self.train = train
         self.test = test
+
+        self.pathologies = [
+            "Enlarged Cardiomediastinum",
+            "Cardiomegaly",
+            "Lung Opacity",
+            "Lung Lesion",
+            "Edema",
+            "Consolidation",
+            "Pneumonia",
+            "Atelectasis",
+            "Pneumothorax",
+            "Pleural Effusion",
+            "Pleural Other",
+            "Fracture",
+            "Support Devices",
+            "No Finding"
+        ]
+        self.pathologies = sorted(self.pathologies)
         
         # Load metadata
         self.metadata_LQ, self.metadata_GT = self._load_metadata()
+        self.labels = self._process_labels(self.metadata_LQ)
 
     def _load_metadata(self):
         """Load metadata for the dataset from CSV file."""
@@ -42,28 +62,57 @@ class ChexDataset(data.Dataset):
         if not self.csv_path_GT.exists():
             raise FileNotFoundError(f"Metadata file not found: {self.csv_path_GT}")
             
-        df_LQ = pl.read_csv(self.csv_path_LQ)
-        df_GT = pl.read_csv(self.csv_path_GT)
+        df_LQ = pd.read_csv(self.csv_path_LQ)
+        df_GT = pd.read_csv(self.csv_path_GT)
 
+        # Filter for validation split first
         if self.train:
-            df_LQ = df_LQ.filter(pl.col("split") == "train_recon")
-            df_GT = df_GT.filter(pl.col("split") == "train_recon")
-        elif not self.test:
-            df_LQ = df_LQ.filter(pl.col("split") == "val_recon")
-            df_GT = df_GT.filter(pl.col("split") == "val_recon")
+            df_LQ = df_LQ[df_LQ["split"] == "val_recon"]
+            df_GT = df_GT[df_GT["split"] == "val_recon"]
         else:
-            df_LQ = df_LQ.filter(pl.col("split") == "test")
-            df_GT = df_GT.filter(pl.col("split") == "test")
-            
+            df_LQ = df_LQ[df_LQ["split"] == "val_class"]
+            df_GT = df_GT[df_GT["split"] == "val_class"]
+        
+        # Get total number of validation samples
         if self.number_of_samples is not None and self.number_of_samples > 0:
-            df_LQ = df_LQ.sample(n=self.number_of_samples, seed=self.seed)
-            df_GT = df_GT.sample(n=self.number_of_samples, seed=self.seed)
-
+            df_LQ = df_LQ.sample(n=self.number_of_samples, random_state=self.seed)
+            df_GT = df_GT.sample(n=self.number_of_samples, random_state=self.seed)
+        
         return df_LQ, df_GT
+    
+    def _process_labels(self, df):
+        # First identify healthy cases
+        healthy = df["No Finding"] == 1
+        
+        labels = []
+        for pathology in self.pathologies:
+            assert pathology in df.columns
+            
+            if pathology == "No Finding":
+                # Handle NaN in No Finding when other pathologies exist
+                for idx, row in df.iterrows():
+                    if row["No Finding"] != row["No Finding"]:  # check for NaN
+                        if (row[self.pathologies] == 1).sum():  # if any pathology present
+                            df.loc[idx, "No Finding"] = 0
+            elif pathology != "Support Devices":
+                # If healthy, other pathologies (except Support Devices) must be 0
+                df.loc[healthy, pathology] = 0
+                
+            mask = df[pathology]
+            labels.append(mask.values)
+        
+        # Convert to numpy array and transpose to get samples x labels
+        labels = np.asarray(labels).T
+        labels = labels.astype(np.float32)
+        
+        # Convert -1 to NaN
+        labels[labels == -1] = np.nan
+        
+        return torch.from_numpy(labels)
 
     def __getitem__(self, index):
-        row_LQ = self.metadata_LQ.row(index, named=True)
-        row_GT = self.metadata_GT.row(index, named=True)
+        row_LQ = self.metadata_LQ.iloc[index]
+        row_GT = self.metadata_GT.iloc[index]
         
         # Load the original image
         image_path_LQ = os.path.join(self.data_root_LQ, row_LQ["Path"])
@@ -76,12 +125,32 @@ class ChexDataset(data.Dataset):
         image_GT = resize(image_GT, (256, 256))
         image_GT = torch.from_numpy(image_GT).float().unsqueeze(0) 
 
+        sex = float(0 if row_LQ["Sex"] == "F" else 1)  # Assuming binary F/M encoding
+        age = float(row_LQ["Age"] <= 61)  # Already boolean, convert to float
+        
+        # Map race to numeric values
+        race_mapping = {
+            'Other': 0,
+            'White': 1,
+            'Black': 2,
+            'Native Hawaiian or Other Pacific Islander': 3,
+            'Asian': 4,
+            'American Indian or Alaska Native': 5
+        }
+        race = float(race_mapping.get(row_LQ["Mapped_Race"], 0))  # Default to 'Other' if not found
+        
+        # Add protected attributes to the tensor
+        protected_attrs = torch.tensor([sex, age, race])
+
+        labels = self.labels[index]
         
         return {
             'LQ': image_LQ,    # degraded image
             'GT': image_GT,    # original image
             'LQ_paths': image_path_LQ,
-            'GT_paths': image_path_GT
+            'GT_paths': image_path_GT,
+            'labels': labels,   # labels
+            'protected_attrs': protected_attrs
         }
 
     def __len__(self):
