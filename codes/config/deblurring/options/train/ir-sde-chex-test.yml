@@ -1,5 +1,5 @@
 #### general settings
-name: ucsf-sde-16
+name: chex10000-sde-testing
 use_tb_logger: true
 model: denoising
 distortion: deblur
@@ -21,12 +21,15 @@ degradation: # for some synthetic dataset that only have GTs
   
 #### datasets
 datasets:
-  number_of_rays: 32
-  dataset: ucsf
-  dataroot: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/UCSF-PDGM
+  number_of_samples: 8
+  dataset: chex
+  csv_path_LQ: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert_noisy/chex-metadata_photon_10000.csv
+  csv_path_GT: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert/chex-metadata.csv
+  dataroot_LQ: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert_noisy
+  dataroot_GT: /vol/miltank/datasets/CheXpert 
 
   use_shuffle: true
-  n_workers: 2  
+  n_workers: 16 
   batch_size: 8
   GT_size: 256
   LR_size: 256
@@ -66,7 +69,6 @@ train:
   weight: 1.0
 
   manual_seed: 0
-
 #### logger
 logger:
   print_per_epoch: 2

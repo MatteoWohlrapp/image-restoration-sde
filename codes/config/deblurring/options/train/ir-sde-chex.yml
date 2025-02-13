@@ -1,5 +1,5 @@
 #### general settings
-name: chex10000-sde
+name: chex3000-sde
 use_tb_logger: true
 model: denoising
 distortion: deblur
@@ -22,9 +22,9 @@ degradation: # for some synthetic dataset that only have GTs
 #### datasets
 datasets:
   dataset: chex
-  csv_path_LQ: /vol/aimspace/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert_noisy/chex-metadata_photon_100000.csv
-  csv_path_GT: /vol/aimspace/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert/chex-metadata.csv
-  dataroot_LQ: /vol/aimspace/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert_noisy
+  csv_path_LQ: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert_noisy/chex-metadata_photon_3000.csv
+  csv_path_GT: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert/chex-metadata.csv
+  dataroot_LQ: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert_noisy
   dataroot_GT: /vol/miltank/datasets/CheXpert 
 
   use_shuffle: true

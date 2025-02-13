@@ -180,13 +180,25 @@ def img2tensor(img):
 
 
 def calculate_psnr(img1, img2):
-    # img1 and img2 have range [0, 255]
+    """Calculate PSNR using skimage
+    Args:
+        img1, img2: Either numpy arrays or torch tensors with range [0, 255]
+    Returns:
+        PSNR value as float
+    """
+    from skimage.metrics import peak_signal_noise_ratio
+
+    # Convert torch tensors to numpy if needed
+    if torch.is_tensor(img1):
+        img1 = img1.detach().cpu().numpy().copy()
+    if torch.is_tensor(img2):
+        img2 = img2.detach().cpu().numpy().copy()
+    
+    # Ensure float64 type
     img1 = img1.astype(np.float64)
     img2 = img2.astype(np.float64)
-    mse = np.mean((img1 - img2) ** 2)
-    if mse == 0:
-        return float("inf")
-    return 20 * math.log10(255.0 / math.sqrt(mse))
+    
+    return peak_signal_noise_ratio(img1, img2, data_range=255)
 
 
 def ssim(img1, img2):
