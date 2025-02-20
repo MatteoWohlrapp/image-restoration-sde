@@ -3,6 +3,7 @@ import logging
 
 import torch
 import torch.utils.data
+from torch.utils.data import WeightedRandomSampler
 
 
 def create_dataloader(dataset, opt, sampler=None):
