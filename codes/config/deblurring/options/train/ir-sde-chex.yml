@@ -1,5 +1,5 @@
 #### general settings
-name: chex10000-sde-fairness-0001
+name: chex10000-sde-t03-ce05
 use_tb_logger: true
 model: denoising
 distortion: deblur

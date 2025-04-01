@@ -1,9 +1,9 @@
 #!/usr/bin/bash
 
 #SBATCH -J "mri_inr"   # job name
-#SBATCH --time=4-00:00:00   # walltime
-#SBATCH --output=/vol/aimspace/projects/practical_SoSe24/mri_inr/matteo/logs/train_%A.out  # Standard output of the script (Can be absolute or relative path)
-#SBATCH --error=/vol/aimspace/projects/practical_SoSe24/mri_inr/matteo/logs/train_%A.err  # Standard error of the script
+#SBATCH --time=2-00:00:00   # walltime
+#SBATCH --output=/vol/miltank/projects/practical_SoSe24/mri_inr/matteo/logs/train_%A.out  # Standard output of the script (Can be absolute or relative path)
+#SBATCH --error=/vol/miltank/projects/practical_SoSe24/mri_inr/matteo/logs/train_%A.err  # Standard error of the script
 #SBATCH --mem=64G
 #SBATCH --nodes=1   # number of nodes
 #SBATCH --ntasks-per-node=1
@@ -18,6 +18,6 @@
 conda deactivate
 conda activate pix
 
-cd "/vol/aimspace/projects/practical_SoSe24/mri_inr/matteo/code/image-restoration-sde/codes/config/deblurring"
+cd "/vol/miltank/projects/practical_SoSe24/mri_inr/matteo/code/image-restoration-sde/codes/config/deblurring"
 
-python train.py -opt=options/train/ir-sde-chex.yml
+python train.py -opt=options/train/ir-sde-ucsf.yml

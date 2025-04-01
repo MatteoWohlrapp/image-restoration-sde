@@ -109,6 +109,11 @@ class DenoisingModel(BaseModel):
 
             self.ema = EMA(self.model, beta=0.995, update_every=10).to(self.device)
             self.log_dict = OrderedDict()
+            
+            # Add running averages for loss normalization
+            self.running_recon_loss = 0.0
+            self.running_fair_loss = 0.0
+            self.beta = 0.96  # exponential moving average decay factor
 
     def feed_data(self, state, LQ, GT=None, protected_attrs=None, labels=None):
         self.state = state.to(self.device)    # noisy_state
@@ -135,15 +140,28 @@ class DenoisingModel(BaseModel):
         # Learning the maximum likelihood objective for state x_{t-1}
         xt_1_expection = sde.reverse_sde_step_mean(self.state, score, timesteps)
         xt_1_optimum = sde.reverse_optimum_step(self.state, self.state_0, timesteps)
-        loss = self.weight * self.loss_fn(xt_1_expection, xt_1_optimum)
+        recon_loss = self.weight * self.loss_fn(xt_1_expection, xt_1_optimum)
         fairness_loss = self.fairness_loss(xt_1_optimum, self.labels, self.protected_attrs)
-        loss += fairness_loss
+
+        # Update running averages
+        self.running_recon_loss = self.beta * self.running_recon_loss + (1 - self.beta) * recon_loss.item()
+        self.running_fair_loss = self.beta * self.running_fair_loss + (1 - self.beta) * fairness_loss.item()
+
+        # Normalize losses if we have non-zero running averages
+        if self.running_recon_loss > 0 and self.running_fair_loss > 0:
+            normalized_recon_loss = recon_loss / self.running_recon_loss
+            normalized_fair_loss = fairness_loss / self.running_fair_loss
+            loss = normalized_recon_loss + normalized_fair_loss
+        else:
+            loss = recon_loss + fairness_loss
 
         loss.backward()
         self.optimizer.step()
         self.ema.update()
 
         # set log
+        self.log_dict["recon_loss"] = recon_loss.item()
+        self.log_dict["fairness_loss"] = fairness_loss.item()
         self.log_dict["loss"] = loss.item()
 
     def test(self, sde=None, save_states=False):

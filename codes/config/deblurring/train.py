@@ -27,7 +27,7 @@ from data.util import bgr2ycbcr
 
 def load_classifier_models(config, device):
     if config["datasets"]["dataset"] == "chex":
-        classifier = torch.load(config["classifier_path"], map_location=device)
+        classifier = torch.load(config["classifier_path"], map_location=device, weights_only=False)
         for param in classifier.parameters():
             param.requires_grad = False
         return classifier
