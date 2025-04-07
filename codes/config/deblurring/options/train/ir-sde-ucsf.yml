@@ -1,5 +1,5 @@
 #### general settings
-name: ucsf8-sde-t03-ce05
+name: ucsf8-sde-adv
 use_tb_logger: true
 model: denoising
 distortion: deblur

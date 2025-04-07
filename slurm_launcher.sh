@@ -9,7 +9,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=16   # number of processor cores (i.e. tasks)
 #SBATCH --qos=master-queuesave
-#SBATCH --gres=gpu:A100:1              # Request 1 specific GPU (e.g., A100)
+#SBATCH --gres=gpu:1              # Request 1 specific GPU (e.g., A100)
 
 # load python module
 . "/opt/anaconda3/etc/profile.d/conda.sh"
@@ -20,4 +20,4 @@ conda activate pix
 
 cd "/vol/miltank/projects/practical_SoSe24/mri_inr/matteo/code/image-restoration-sde/codes/config/deblurring"
 
-python train.py -opt=options/train/ir-sde-ucsf.yml
+python train.py -opt=options/train/ir-sde-chex.yml

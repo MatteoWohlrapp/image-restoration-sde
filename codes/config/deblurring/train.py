@@ -54,8 +54,8 @@ def load_classifier_models(config, device):
             first_output = task_models["TGradeBCEClassifier"](x)
             second_output = task_models["TTypeBCEClassifier"](x)
             return torch.cat((first_output, second_output), dim=1)
-        return apply_task_models
-
+        #return apply_task_models
+        return task_models["TTypeBCEClassifier"].network
 
 def main():
     #### setup options of three networks
@@ -173,7 +173,7 @@ def main():
     print(f"device: {device}", flush=True)
 
     classifier_models = load_classifier_models(opt, device)
-    fairness_loss = FairnessLoss(classifier_models, fairness_lambda=opt["fairness_lambda"])
+    fairness_loss = FairnessLoss(classifier_models, device=device)
     model.fairness_loss = fairness_loss
 
     current_step = 0
