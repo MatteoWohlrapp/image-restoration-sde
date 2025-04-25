@@ -1,5 +1,5 @@
 #### general settings
-name: chex3000-sde
+name: chex-sde
 use_tb_logger: true
 model: denoising
 distortion: deblur
@@ -22,13 +22,13 @@ degradation: # for some synthetic dataset that only have GTs
 #### datasets
 datasets:
   dataset: chex
-  csv_path_LQ: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert_noisy/chex-metadata_photon_3000.csv
-  csv_path_GT: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert/chex-metadata.csv
-  dataroot_LQ: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert_noisy
-  dataroot_GT: /vol/miltank/datasets/CheXpert 
+  csv_path_LQ: ../chex-metadata_photon_10000.csv
+  csv_path_GT: ../chexpert-metadata-processed.csv
+  dataroot_LQ: ../CheXpert_noisy
+  dataroot_GT: ../CheXpert 
 
   use_shuffle: true
-  n_workers: 16 
+  n_workers: 2 
   batch_size: 8
   GT_size: 256
   LR_size: 256
@@ -57,7 +57,7 @@ train:
   lr_scheme: MultiStepLR
   beta1: 0.9
   beta2: 0.99
-  niter: 700000
+  niter: 150000
   warmup_iter: -1  # no warm up
   lr_steps: [200000, 400000, 600000]
   lr_gamma: 0.5

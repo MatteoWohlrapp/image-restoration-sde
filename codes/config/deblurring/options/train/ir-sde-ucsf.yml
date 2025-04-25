@@ -1,5 +1,5 @@
 #### general settings
-name: ucsf-sde-16
+name: ucsf-sde
 use_tb_logger: true
 model: denoising
 distortion: deblur
@@ -18,16 +18,16 @@ degradation: # for some synthetic dataset that only have GTs
 
   # for super-resolution
   scale: 4
-  
+
 #### datasets
 datasets:
-  number_of_rays: 32
+  number_of_rays: 60
   dataset: ucsf
-  dataroot: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/UCSF-PDGM
+  dataroot: ../UCSF-PDGM
 
   use_shuffle: true
   n_workers: 2  
-  batch_size: 8
+  batch_size: 16
   GT_size: 256
   LR_size: 256
   use_flip: true
@@ -55,7 +55,7 @@ train:
   lr_scheme: MultiStepLR
   beta1: 0.9
   beta2: 0.99
-  niter: 700000
+  niter: 70000
   warmup_iter: -1  # no warm up
   lr_steps: [200000, 400000, 600000]
   lr_gamma: 0.5
@@ -66,7 +66,6 @@ train:
   weight: 1.0
 
   manual_seed: 0
-
 #### logger
 logger:
   print_per_epoch: 2
