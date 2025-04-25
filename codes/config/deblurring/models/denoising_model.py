@@ -149,9 +149,8 @@ class DenoisingModel(BaseModel):
 
         # Normalize losses if we have non-zero running averages
         if self.running_recon_loss > 0 and self.running_fair_loss > 0:
-            normalized_recon_loss = recon_loss / self.running_recon_loss
-            normalized_fair_loss = fairness_loss / self.running_fair_loss
-            loss = normalized_recon_loss + normalized_fair_loss
+            normalized_fair_loss = fairness_loss * (self.running_recon_loss / self.running_fair_loss)
+            loss = recon_loss + normalized_fair_loss
         else:
             loss = recon_loss + fairness_loss
 

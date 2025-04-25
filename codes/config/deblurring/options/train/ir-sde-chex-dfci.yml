@@ -1,5 +1,5 @@
 #### general settings
-name: chex10000-sde-fairness-0001
+name: chex10000-sde-fairness-eodd
 use_tb_logger: true
 model: denoising
 distortion: deblur
@@ -29,7 +29,7 @@ datasets:
 
   use_shuffle: true
   n_workers: 2
-  batch_size: 4
+  batch_size: 8
   GT_size: 256
   LR_size: 256
   use_flip: true
@@ -71,7 +71,7 @@ train:
 #### logger
 logger:
   print_per_epoch: 2
-  save_checkpoint_freq: 1
+  save_checkpoint_freq: 10
 
 path:
   pretrain_model_G: /lotterlab/users/matteo/models/Noise/Chex/Diffusion/SDE-10000-40_G.pth

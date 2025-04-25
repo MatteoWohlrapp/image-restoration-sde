@@ -1,9 +1,9 @@
 #### general settings
-name: ucsf-sde-8-fairness-0001
+name: ucsf-sde-8-fairness-eodd
 use_tb_logger: true
 model: denoising
 distortion: deblur
-gpu_ids: [1]
+gpu_ids: [0]
 
 sde:
   max_sigma: 10
@@ -69,7 +69,7 @@ train:
 #### logger
 logger:
   print_per_epoch: 2
-  save_checkpoint_freq: 1
+  save_checkpoint_freq: 10
 
 path:
   pretrain_model_G: /lotterlab/users/matteo/models/Noise/UCSF/Diffusion/08/123_G.pth
