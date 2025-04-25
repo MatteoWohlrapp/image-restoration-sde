@@ -1,5 +1,5 @@
 #### general settings
-name: ucsf8-sde-t03-ce05
+name: ucsf-sde
 use_tb_logger: true
 model: denoising
 distortion: deblur
@@ -23,7 +23,7 @@ degradation: # for some synthetic dataset that only have GTs
 datasets:
   number_of_rays: 60
   dataset: ucsf
-  dataroot: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/UCSF-PDGM
+  dataroot: ../UCSF-PDGM
 
   use_shuffle: true
   n_workers: 2  
@@ -69,16 +69,16 @@ train:
 #### logger
 logger:
   print_per_epoch: 2
-  save_checkpoint_freq: 1
+  save_checkpoint_freq: 10
 
 path:
-  pretrain_model_G: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/code/torchxrayvision/UCSF_8_123_G.pth
+  pretrain_model_G: ../models/sde.pth
   strict_load: True
 
 fairness_lambda: 0.001
 
 classifiers: 
   - name: TGradeBCEClassifier
-    path: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/code/torchxrayvision/tgrade_test_20240925_113550_epoch_1_best.pth
+    path: ../models/tgrade.pth
   - name: TTypeBCEClassifier
-    path: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/code/torchxrayvision/ttype_test_20240925_113544_epoch_1_best.pth
+    path: ../models/ttype.pth
