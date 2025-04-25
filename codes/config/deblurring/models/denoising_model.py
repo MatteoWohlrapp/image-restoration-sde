@@ -136,8 +136,6 @@ class DenoisingModel(BaseModel):
         xt_1_expection = sde.reverse_sde_step_mean(self.state, score, timesteps)
         xt_1_optimum = sde.reverse_optimum_step(self.state, self.state_0, timesteps)
         loss = self.weight * self.loss_fn(xt_1_expection, xt_1_optimum)
-        fairness_loss = self.fairness_loss(xt_1_optimum, self.labels, self.protected_attrs)
-        loss += fairness_loss
 
         loss.backward()
         self.optimizer.step()
