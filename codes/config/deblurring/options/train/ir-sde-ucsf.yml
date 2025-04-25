@@ -1,5 +1,5 @@
 #### general settings
-name: ucsf8-sde-adv
+name: ucsf8-sde-adv-non-normalized-opt
 use_tb_logger: true
 model: denoising
 distortion: deblur
@@ -69,7 +69,7 @@ train:
 #### logger
 logger:
   print_per_epoch: 2
-  save_checkpoint_freq: 1
+  save_checkpoint_freq: 10
 
 path:
   pretrain_model_G: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/code/torchxrayvision/UCSF_8_123_G.pth

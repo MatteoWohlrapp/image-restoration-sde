@@ -1,5 +1,5 @@
 #### general settings
-name: chex10000-sde-adv
+name: chex10000-sde-adv-non-normalized-opt
 use_tb_logger: true
 model: denoising
 distortion: deblur
@@ -71,7 +71,7 @@ train:
 #### logger
 logger:
   print_per_epoch: 2
-  save_checkpoint_freq: 5
+  save_checkpoint_freq: 10
 
 path:
   pretrain_model_G: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/code/image-restoration-sde/experiments/deblurring/chex10000-sde/models/40_G.pth
