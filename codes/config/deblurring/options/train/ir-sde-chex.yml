@@ -1,5 +1,5 @@
 #### general settings
-name: chex10000-sde-adv-non-normalized-opt
+name: chex-sde
 use_tb_logger: true
 model: denoising
 distortion: deblur
@@ -22,10 +22,10 @@ degradation: # for some synthetic dataset that only have GTs
 #### datasets
 datasets:
   dataset: chex
-  csv_path_LQ: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert_noisy/chex-metadata_photon_10000.csv
-  csv_path_GT: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert/chexpert-metadata-processed.csv
-  dataroot_LQ: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/data/CheXpert_noisy
-  dataroot_GT: /vol/miltank/datasets/CheXpert 
+  csv_path_LQ: ../chex-metadata_photon_10000.csv
+  csv_path_GT: ../chexpert-metadata-processed.csv
+  dataroot_LQ: ../CheXpert_noisy
+  dataroot_GT: ../CheXpert 
 
   use_shuffle: true
   n_workers: 2 
@@ -74,9 +74,9 @@ logger:
   save_checkpoint_freq: 10
 
 path:
-  pretrain_model_G: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/code/image-restoration-sde/experiments/deblurring/chex10000-sde/models/40_G.pth
+  pretrain_model_G: ../models/sde.pth
   strict_load: True
 
 fairness_lambda: 0.001
 
-classifier_path: /vol/miltank/projects/practical_SoSe24/mri_inr/matteo/code/torchxrayvision/chex-densenet-class_norm01-best.pt
+classifier_path: ../models/classifier.pth
