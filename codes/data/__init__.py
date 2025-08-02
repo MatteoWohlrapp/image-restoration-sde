@@ -5,11 +5,16 @@ import torch
 import torch.utils.data
 
 
-def create_dataloader(dataset, opt, sampler=None):
+def create_dataloader(dataset, opt, sampler=None, reweighting=False):
     if dataset.train:
         num_workers = opt["datasets"]["n_workers"]
         batch_size = opt["datasets"]["batch_size"]
-        shuffle = True
+        shuffle = True if not reweighting else False
+
+        if reweighting:
+            sample_weights = dataset.compute_sample_weights()
+            sampler = WeightedRandomSampler(sample_weights, len(dataset), replacement=True)
+            
         return torch.utils.data.DataLoader(
             dataset,
             batch_size=batch_size,

@@ -1,3 +1,24 @@
+## Fork Information
+
+This repository is forked and adjusted to fine-tune reconstruction on UCSF and CheXpert medical imaging datasets for fairness. The codebase uses the deblurring framework with stochastic differential equations (SDE) for medical image reconstruction.
+
+### Training Configuration
+
+To train on the respective datasets, use the following commands after adjusting the paths to the dataset in the configuration files:
+
+```bash
+cd codes/config/deblurring
+
+# For UCSF-PDGM dataset:
+python3 train.py -opt=options/train/ir-sde-ucsf.yml
+
+# For CheXpert dataset:
+python3 train.py -opt=options/train/ir-sde-chex.yml
+```
+
+The configuration files contain all necessary parameters for training on each dataset. Inside the configuration is also the option ```fairness_method``` to switch between fairness implementaions.
+
+
 
 ## Image Restoration SDE <br><sub>Official PyTorch Implementations of [[IR-SDE]](https://proceedings.mlr.press/v202/luo23b.html)(ICML 2023) and [[Refusion]](https://arxiv.org/abs/2304.08291)(CVPRW 2023). </sub>
 

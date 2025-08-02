@@ -222,3 +222,22 @@ class UcsfDataset(data.Dataset):
             slices.append((undersampled_tensor, slice_tensor))
 
         return slices 
+
+    def compute_sample_weights(self):
+
+        df = self.metadata.clone()  # or dataset.metadata if you don't mind modifying it
+        
+        # Define the sensitive columns. For example, here we use 'sex' and 'age_at_mri'
+        sensitive_cols = ['sex', 'age_at_mri']
+        
+        # Compute group counts using Polars
+        group_counts = df.group_by(sensitive_cols).agg(pl.count()).rename({'count': 'group_count'})
+        
+        # Join the group counts back to the original dataframe
+        df = df.join(group_counts, on=sensitive_cols, how='left')
+        
+        # Compute the weight as the inverse of the group_count
+        weights = 1.0 / df['group_count']
+        
+        # Return as a list
+        return weights.to_list()

@@ -4,6 +4,7 @@ use_tb_logger: true
 model: denoising
 distortion: deblur
 gpu_ids: [0]
+fairness_method: eodd # eodd, adversarial, reweighting
 
 sde:
   max_sigma: 10

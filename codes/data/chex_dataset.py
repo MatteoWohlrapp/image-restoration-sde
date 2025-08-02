@@ -155,3 +155,23 @@ class ChexDataset(data.Dataset):
 
     def __len__(self):
         return len(self.metadata_LQ)
+
+    def compute_sample_weights(dataset):
+        # Get the metadata DataFrame; assuming self.metadata_A is used
+        df = dataset.metadata_LQ.copy()
+        
+        # Use the sensitive columns directly, e.g., 'Sex', 'Age', 'Mapped_Race'
+        # Adjust the column names as necessary.
+        sensitive_cols = ['Sex', 'Age', 'Mapped_Race']
+        
+        # Group by sensitive attributes and count frequency
+        group_counts = df.groupby(sensitive_cols).size().reset_index(name='count')
+        
+        # Merge the count back to the DataFrame on the sensitive columns
+        df = df.merge(group_counts, on=sensitive_cols, how='left')
+        
+        # Create a weights array: inverse of the count
+        weights = 1.0 / df['count']
+        
+        # Convert to list (or a numpy array) so it matches the order of samples in the dataset
+        return weights.tolist()

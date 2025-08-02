@@ -20,7 +20,9 @@ sys.path.insert(0, "../../")
 import utils as util
 from data import create_dataloader, create_dataset
 from data.data_sampler import DistIterSampler
-from fairness.fairness_loss import FairnessLoss
+from fairness.eodd_loss import EODDLoss
+from fairness.adversarial_loss import AdversarialLoss
+from fairness.identity_loss import IdentityLoss
 from fairness.classification_model import TGradeBCEClassifier, TTypeBCEClassifier
 from fairness.resnet_classification_network import ResNetClassifierNetwork
 from data.util import bgr2ycbcr
@@ -143,7 +145,7 @@ def main():
     train_size = int(math.ceil(len(train_set) / opt["datasets"]["batch_size"]))
     total_iters = int(opt["train"]["niter"])
     total_epochs = int(math.ceil(total_iters / train_size))
-    train_loader = create_dataloader(train_set, opt)
+    train_loader = create_dataloader(train_set, opt, reweighting=opt["fairness_method"] == "reweighting")
     logger.info(
         "Number of train images: {:,d}, iters: {:,d}".format(
             len(train_set), train_size
@@ -156,7 +158,7 @@ def main():
     )
 
     val_set = create_dataset(opt["datasets"], train=False)
-    val_loader = create_dataloader(val_set, opt)
+    val_loader = create_dataloader(val_set, opt, reweighting=opt["fairness_method"] == "reweighting")
 
     logger.info(
         "Number of val images in [{:s}]: {:d}".format(
@@ -173,7 +175,15 @@ def main():
     print(f"device: {device}", flush=True)
 
     classifier_models = load_classifier_models(opt, device)
-    fairness_loss = FairnessLoss(classifier_models, fairness_lambda=opt["fairness_lambda"])
+    if opt["fairness_method"] == "eodd":
+        fairness_loss = EODDLoss(classifier_models, fairness_lambda=opt["fairness_lambda"])
+    elif opt["fairness_method"] == "adversarial":
+        fairness_loss = AdversarialLoss(classifier_models, fairness_lambda=opt["fairness_lambda"])
+    elif opt["fairness_method"] == "reweighting":
+        fairness_loss = IdentityLoss()
+    else:
+        raise ValueError(f"Invalid fairness method: {opt['fairness_method']}")
+    
     model.fairness_loss = fairness_loss
 
     current_step = 0
