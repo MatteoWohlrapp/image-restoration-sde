@@ -4,7 +4,7 @@ This repository is forked and adjusted to train reconstruction on UCSF and CheXp
 
 ### Training Configuration
 
-To train on the respective datasets, use the following commands after adjusting the paths to the dataset in the configuration files.:
+To train on the respective datasets, use the following commands after adjusting the paths to the dataset in the configuration files:
 
 ```bash
 cd codes/config/deblurring
